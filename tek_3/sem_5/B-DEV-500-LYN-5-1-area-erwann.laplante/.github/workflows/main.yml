@@ -1,0 +1,45 @@
+
+name: Check Docker
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+      - master
+      - try_action
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: pull flutter image
+        run: ./init_docker.sh
+
+      - name: Build db
+        working-directory: back-end
+        run:  docker build . -f Dockerfile-db-linux
+
+      - name: Build server
+        working-directory: back-end
+        run:  docker build . -f Dockerfile-back
+
+      # - name: Build mobile
+      #   working-directory: front-end/mobile
+      #   run: docker build . -f Dockerfile-linux
+
+      # - name: Build web
+      #   working-directory: front-end/web
+      #   run: docker build .
+
+      - name: Launch docker container
+        run: docker-compose up -d server
+
+      - shell: bash
+        run: docker volume ls && docker ps -a && docker images ls
+
+      - name: stop docker
+        run: docker-compose down

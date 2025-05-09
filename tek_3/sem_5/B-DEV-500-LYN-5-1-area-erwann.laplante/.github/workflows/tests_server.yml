@@ -1,0 +1,27 @@
+
+name: Test server
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: pull flutter image
+        run: ./init_docker.sh
+
+      - name: Launch docker
+        run: docker-compose up --build -d db server
+
+      - name: test bash command server
+        run: ./test_server.sh
+
+      - name: stop docker
+        run:  docker-compose down && ./clear_docker.sh

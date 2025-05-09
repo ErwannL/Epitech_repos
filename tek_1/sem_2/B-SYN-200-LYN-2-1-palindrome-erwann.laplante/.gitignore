@@ -1,0 +1,8 @@
+
+a.out
+*.o
+*.txt
+.vscode
+
+palindrome
+libmy.a

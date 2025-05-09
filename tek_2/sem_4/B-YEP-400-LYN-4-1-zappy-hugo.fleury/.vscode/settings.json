@@ -1,0 +1,13 @@
+/*
+** EPITECH PROJECT, 2023
+** B-YEP-400-LYN-4-1-zappy-hugo.fleury
+** File description:
+** settings
+*/
+
+{
+    "python.analysis.extraPaths": [
+        "./ai/include",
+        "./ai/src"
+    ]
+}

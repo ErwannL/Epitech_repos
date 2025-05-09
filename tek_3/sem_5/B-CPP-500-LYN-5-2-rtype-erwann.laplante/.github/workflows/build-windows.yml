@@ -1,0 +1,55 @@
+name: Windows CI / CD
+
+on:
+  push:
+    branches:
+      - main
+      - devV2
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: ./scripts/windows/install.bat
+
+    - name: build Windows
+      run: ./scripts/windows/build.bat build
+
+    - name: verify build
+      run: |
+            dir ./build/r-type_client.exe
+            dir ./build/r-type_server.exe
+
+  pkg-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: ./scripts/windows/install.bat
+
+    - name: Run windows pkg
+      run: ./scripts/windows/build.bat pkg
+
+    - name: verify windows pkg
+      run: ls ./build/R-Type-0.1.1-Windows.zip
+
+  doc-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: ./scripts/windows/install.bat
+
+    - name: verify windows doc
+      run: ./scripts/windows/build.bat doc

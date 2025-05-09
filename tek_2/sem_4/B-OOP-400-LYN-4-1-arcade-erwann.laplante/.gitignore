@@ -1,0 +1,11 @@
+
+arcade
+a.out
+*.o
+info.txt
+test/
+lib/*.so
+.vscode/
+tmp/
+*pdf
+*sprite.txt

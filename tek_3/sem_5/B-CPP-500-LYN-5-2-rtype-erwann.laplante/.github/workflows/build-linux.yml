@@ -1,0 +1,158 @@
+name: Linux CI / CD
+
+on:
+  push:
+    branches:
+      - main
+      - devV2
+
+jobs:
+  bash-build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: build Linux
+        run: ./scripts/linux/build.sh --build
+
+      - name: verify bash build
+        run: |
+              ls ./build/r-type_client
+              ls ./build/r-type_server
+
+  bash-pkg-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: Run bash pkg
+        run: sudo ./scripts/linux/build.sh --pkg
+
+      - name: verify bash pkg
+        run: ls ./build/R-Type-1.9.4-Linux.tar.gz
+
+  bash-doc-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: Run bash doc
+        run: sudo ./scripts/linux/build.sh --doc
+
+  justfile-build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: Run Justfile build
+        run: |
+          export PATH="$PATH:$HOME/bin"
+          just build
+
+      - name: verify Justfile build
+        run: |
+              ls ./build/r-type_client
+              ls ./build/r-type_server
+
+  justfile-pkg-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: Run Justfile pkg
+        run: |
+          export PATH="$PATH:$HOME/bin"
+          sudo just pkg
+
+      - name: verify Justfile pkg
+        run: ls ./build/R-Type-1.9.4-Linux.tar.gz
+
+  justefile-coverage-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: Run Justfile coverage
+        run: |
+          export PATH="$PATH:$HOME/bin"
+          just coverage
+
+  justefile-doc-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/linux/install.sh
+              chmod +x ./scripts/linux/build.sh
+
+      - name: Install dependencies
+        run: ./scripts/linux/install.sh
+
+      - name: Run Justfile doc
+        run: |
+          export PATH="$PATH:$HOME/bin"
+          just doc

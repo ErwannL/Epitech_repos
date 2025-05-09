@@ -1,0 +1,141 @@
+name: macOS CI / CD
+
+on:
+  push:
+    branches:
+      - main
+      - devV2
+
+jobs:
+  bash-build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: build Macos
+        run: ./scripts/macos/build.sh --build
+
+      - name: verify bash build
+        run: |
+              ls ./build/r-type_client
+              ls ./build/r-type_server
+  bash-pkg-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: Run bash pkg
+        run: ./scripts/macos/build.sh --pkg
+
+      - name: verify bash pkg
+        run: ls ./build/R-Type-1.9.4-Darwin.tar.gz
+
+  bash-doc-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: Run bash doc
+        run: sudo ./scripts/macos/build.sh --doc
+
+  justefile-build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: Run Justfile build
+        run: just build
+
+      - name: verify Justfile build
+        run: |
+              ls ./build/r-type_client
+              ls ./build/r-type_server
+  justefile-pkg-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: Run Justfile pkg
+        run: just pkg
+
+      - name: verify Justfile pkg
+        run: ls ./build/R-Type-1.9.4-Darwin.tar.gz
+
+  justefile-coverage-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: Run Justfile coverage
+        run: just coverage
+
+  justefile-doc-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: chmod bash
+        run: |
+              chmod +x ./scripts/macos/install.sh
+              chmod +x ./scripts/macos/build.sh
+      - name: Install dependencies
+        run: ./scripts/macos/install.sh
+
+      - name: Run Justfile doc
+        run: just doc

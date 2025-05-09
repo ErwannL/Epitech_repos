@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-configmap
+  namespace: default
+  labels:
+    app: postgres-db
+    stage: development  
+data:
+  POSTGRES_HOST: "postgres-service.default.svc.cluster.local"
+  POSTGRES_PORT: '5432'
+  POSTGRES_DB: postgres-db

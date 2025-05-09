@@ -1,0 +1,11 @@
+
+nanotekspice
+a.out
+config/
+.vscode
+.info.txt
+*.o
+unit-tests
+*.gcda
+*.gcno
+libmy.a

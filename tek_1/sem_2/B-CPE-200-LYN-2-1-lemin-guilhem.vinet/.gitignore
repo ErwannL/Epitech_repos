@@ -1,0 +1,11 @@
+*.out
+*~
+._*
+*#*
+*.o
+*.a
+*.txt
+*.gch
+.DS_Store
+.vscode
+lem_in

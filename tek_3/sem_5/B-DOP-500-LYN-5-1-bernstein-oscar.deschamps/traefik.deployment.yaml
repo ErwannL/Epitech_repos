@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-public  
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-public
+  labels:
+    k8s-app: traefik
+    stage: progressiv
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: traefik
+      stage: progressiv
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik
+        stage: progressiv  
+        name: traefik-ingress
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60  
+      restartPolicy: Always
+      containers:
+        - name: traefik-container
+          image: traefik:1.7
+          args:
+          - --api
+          - --kubernetes
+          - --logLevel=INFO
+          ports:
+            - name: http
+              containerPort: 80
+            - name: admin
+              containerPort: 8080
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: k8a-app
+                operator: In
+                values:
+                - traefik 
+              - key: stage
+                operator: In
+                values:
+                - progressiv  
+            topologyKey: "kubernetes.io/hostname"

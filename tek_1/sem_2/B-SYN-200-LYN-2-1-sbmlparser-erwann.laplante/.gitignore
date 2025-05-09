@@ -1,0 +1,7 @@
+
+a.out
+SBMLparser
+*.o
+example.sbml
+*.txt
+.vscode

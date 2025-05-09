@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-deploy
+  namespace: default
+  labels:
+    app: redis-deployment
+    stage: back
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      stage: backstage
+  template:
+    metadata:
+      labels:
+        app: redis
+        stage: backstage
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: redis
+          image: redis:5.0
+          imagePullPolicy: IfNotPresent  
+          ports:
+            - containerPort: 6379

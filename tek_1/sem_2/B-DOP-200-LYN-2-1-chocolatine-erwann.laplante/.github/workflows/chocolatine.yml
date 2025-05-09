@@ -1,0 +1,32 @@
+name: chocolatine
+
+on:
+  push:
+    branches-ignore:
+      - 'ga-ignore-*'
+  pull_request:
+    branches-ignore:
+      - 'ga-ignore-*'
+
+env:
+  MIRROR_URL: https://github.com/EpitechPromo2026/B-DOP-200-LYN-2-1-chocolatine-erwann.laplante.git
+  EXECUTABLES: pushswap, lib/my/libmy.a, antman/antman,giantman/giantman
+
+jobs:
+  Explore-GitHub-Actions:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Secrets
+        uses: actions/checkout@v3
+        with:
+          super_secret: ${{ secrets.SuperSecret }}
+        env:
+          super_secret: ${{ secrets.SuperSecret }}
+      - name: Check_files
+        id: check_repository_cleanliness
+        uses: actions/checkout@v3
+        with:
+          files: "#*, *#, *~, *pain_au_chocolat*, *.o, *.a, *.so, *.gcno, *.gcda, *.gcov, tmp/*"
+      - name: Run_if_files
+        if: steps.check_repository_cleanliness.outputs.files_exists == 'false'
+        run: echo All files exists

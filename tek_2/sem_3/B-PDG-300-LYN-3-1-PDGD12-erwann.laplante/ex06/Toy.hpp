@@ -1,0 +1,66 @@
+/*
+** EPITECH PROJECT, 2023
+** B-PDG-300-LYN-3-1-PDGD12-erwann.laplante
+** File description:
+** Toy
+*/
+
+#ifndef TOY_HPP_
+    #define TOY_HPP_
+
+    #include "Picture.hpp"
+
+    class Toy {
+        public:
+            enum ToyType {
+                BASIC_TOY,
+                ALIEN,
+                BUZZ,
+                WOODY
+            };
+
+            class Error {
+                public:
+                    enum ErrorType {
+                        UNKNOWN,
+                        PICTURE,
+                        SPEAK
+                    };
+
+                    Error();
+                    ~Error();
+
+                    std::string what() const noexcept;
+                    std::string where() const noexcept;
+
+                    ErrorType type;
+            };
+
+            Toy();
+            Toy(ToyType type, std::string name, std::string filename);
+            ~Toy();
+
+            ToyType getType() const;
+            std::string getName() const;
+            std::string getAscii() const;
+            Error getLastError() const;
+
+            void setName(std::string name);
+            bool setAscii(std::string file_name);
+
+            Toy &operator=(const Toy &toy);
+            Toy &operator<<(const std::string &string);
+
+            bool speak(const std::string &statement);
+            bool speak_es(const std::string &statement);
+
+        protected:
+            ToyType _type;
+            std::string _name;
+            Picture _picture;
+            Error _error;
+    };
+
+    std::ostream &operator<<(std::ostream &stream, Toy const &toy);
+
+#endif /* !TOY_HPP_ */

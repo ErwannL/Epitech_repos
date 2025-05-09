@@ -1,0 +1,11 @@
+a.out
+*~
+._*
+*#*
+*.o
+*.a
+*.gch
+libmy.a
+main.h
+.DS_Store
+.vscode

@@ -1,0 +1,40 @@
+
+# personal files
+.private_documentation
+
+# binary files
+r-type_server
+r-type_client
+
+# objects
+*.o
+
+# build files
+build
+build/
+
+# useless VScode files
+.vscode
+
+# useless mac files
+.DS_Store
+
+# Cmake useless files
+.cache
+/.vs/B-CPP-500-LYN-5-2-rtype-erwann.laplante/FileContentIndex
+/.vs
+
+# windows installation
+ninja/
+*.msi
+
+# pkg
+*.tar.gz
+*.zip
+
+# coverage files
+tests/results.txt
+
+# doxyfiles
+html/
+latex/

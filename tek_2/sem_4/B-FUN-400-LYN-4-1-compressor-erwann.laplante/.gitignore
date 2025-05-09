@@ -1,0 +1,12 @@
+
+.stack-work/
+*~
+
+imageCompressor.cabal
+CHANGELOG.md
+LICENSE
+README.md
+stack.yaml.lock
+
+imageCompressor
+info/
